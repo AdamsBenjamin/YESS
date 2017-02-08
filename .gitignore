@@ -1,0 +1,13 @@
+# objects and archives
+*.[oa]
+
+# complete builds
+yes[as]
+
+# provided files
+efbloader
+testyess
+run.pl
+
+# result directory
+Tests/*

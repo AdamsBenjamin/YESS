@@ -1,0 +1,84 @@
+#
+#  Name: Benjamin Adams
+#        Chun Zheng
+#  Description:  This program calls a function Count. Count
+#                takes as input the starting address of a list 
+#                of integers and an integer value.  Count returns in %eax
+#                the number of times that the value appears in the
+#                list.  Both the list of integers and the integer 
+#                value are in memory and initialized by using .long
+#                directives.  This list is "null" terminated.  
+#
+        .pos 0
+# initialize the stack pointer and the frame pointer to support function calls
+init:   irmovl Stack, %esp      
+        irmovl Stack, %ebp
+        jmp Main
+
+Main:   irmovl param, %eax  # get address of the integer value parameter
+        mrmovl (%eax), %eax # get value of the integer
+        pushl %eax          # parameters go on the stack
+        irmovl nums, %eax   # get address of the list of integers
+        pushl %eax          # push starting address of list onto stack
+# count how many times the integer value appears in the list of integers
+# return value goes in %eax
+        call Count         
+        halt
+
+# Count function
+# description: Count the number of times an integer value appears in a
+#              list of integers.
+# parameters: 12(%ebp) - an integer value
+#              8(%ebp) - starting address of a null (0) terminated
+#                       list of integers
+# returns: count of the number of times the integer value appears in
+#          the list; result returned in register %eax
+Count:  pushl %ebp
+        rrmovl %esp, %ebp
+        
+        mrmovl 12(%ebp), %esi
+        mrmovl 8(%ebp), %ebp
+#make %eax = 0
+        irmovl 0, %eax
+        irmovl 0, %edx
+        mrmovl (%ebp), %edi
+
+loop:
+#compare param to num[i]
+        subl %esi, %edi
+        jne incebp
+#increment %eax for equal
+        irmovl 1, %edi
+        addl %edi, %eax
+#increment %ebp by 4
+incebp:
+        irmovl 4, %edi
+        addl %edi, %ebp
+        mrmovl (%ebp), %edi
+#check %ebp for null term.
+        
+        addl %edx, %edi
+        jne loop
+                                #your code will go here; be sure to put count in register %eax
+        popl %ebp
+        ret
+
+# I use a .pos here to force the data to start at a specific location.
+# Normally, we would just use a .align 4
+        .pos 0xb0
+param:  .long 3                 # contains the value to be counted
+nums:   .long 3                 # the list of numbers
+        .long 1
+        .long 4
+        .long 5
+        .long 9
+        .long 3
+        .long 10
+        .long 9
+        .long 3
+        .long 12
+        .long 3
+        .long 0                 # null terminated list
+
+        .pos 0x100
+Stack:

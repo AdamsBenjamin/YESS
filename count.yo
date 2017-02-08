@@ -1,0 +1,84 @@
+                      | #
+                      | #  Name: Benjamin Adams
+                      | #        Chun Zheng
+                      | #  Description:  This program calls a function Count. Count
+                      | #                takes as input the starting address of a list 
+                      | #                of integers and an integer value.  Count returns in %eax
+                      | #                the number of times that the value appears in the
+                      | #                list.  Both the list of integers and the integer 
+                      | #                value are in memory and initialized by using .long
+                      | #                directives.  This list is "null" terminated.  
+                      | #
+  0x000:              |         .pos 0
+                      | # initialize the stack pointer and the frame pointer to support function calls
+  0x000: 30f400010000 | init:   irmovl Stack, %esp      
+  0x006: 30f500010000 |         irmovl Stack, %ebp
+  0x00c: 7011000000   |         jmp Main
+                      | 
+  0x011: 30f0b0000000 | Main:   irmovl param, %eax  # get address of the integer value parameter
+  0x017: 500000000000 |         mrmovl (%eax), %eax # get value of the integer
+  0x01d: a00f         |         pushl %eax          # parameters go on the stack
+  0x01f: 30f0b4000000 |         irmovl nums, %eax   # get address of the list of integers
+  0x025: a00f         |         pushl %eax          # push starting address of list onto stack
+                      | # count how many times the integer value appears in the list of integers
+                      | # return value goes in %eax
+  0x027: 802d000000   |         call Count         
+  0x02c: 00           |         halt
+                      | 
+                      | # Count function
+                      | # description: Count the number of times an integer value appears in a
+                      | #              list of integers.
+                      | # parameters: 12(%ebp) - an integer value
+                      | #              8(%ebp) - starting address of a null (0) terminated
+                      | #                       list of integers
+                      | # returns: count of the number of times the integer value appears in
+                      | #          the list; result returned in register %eax
+  0x02d: a05f         | Count:  pushl %ebp
+  0x02f: 2045         |         rrmovl %esp, %ebp
+                      |         
+  0x031: 50650c000000 |         mrmovl 12(%ebp), %esi
+  0x037: 505508000000 |         mrmovl 8(%ebp), %ebp
+                      | #make %eax = 0
+  0x03d: 30f000000000 |         irmovl 0, %eax
+  0x043: 30f200000000 |         irmovl 0, %edx
+  0x049: 507500000000 |         mrmovl (%ebp), %edi
+                      | 
+  0x04f:              | loop:
+                      | #compare param to num[i]
+  0x04f: 6167         |         subl %esi, %edi
+  0x051: 745e000000   |         jne incebp
+                      | #increment %eax for equal
+  0x056: 30f701000000 |         irmovl 1, %edi
+  0x05c: 6070         |         addl %edi, %eax
+                      | #increment %ebp by 4
+  0x05e:              | incebp:
+  0x05e: 30f704000000 |         irmovl 4, %edi
+  0x064: 6075         |         addl %edi, %ebp
+  0x066: 507500000000 |         mrmovl (%ebp), %edi
+                      | #check %ebp for null term.
+                      |         
+  0x06c: 6027         |         addl %edx, %edi
+  0x06e: 744f000000   |         jne loop
+                      |                                 #your code will go here; be sure to put count in register %eax
+  0x073: b05f         |         popl %ebp
+  0x075: 90           |         ret
+                      | 
+                      | # I use a .pos here to force the data to start at a specific location.
+                      | # Normally, we would just use a .align 4
+  0x0b0:              |         .pos 0xb0
+  0x0b0: 03000000     | param:  .long 3                 # contains the value to be counted
+  0x0b4: 03000000     | nums:   .long 3                 # the list of numbers
+  0x0b8: 01000000     |         .long 1
+  0x0bc: 04000000     |         .long 4
+  0x0c0: 05000000     |         .long 5
+  0x0c4: 09000000     |         .long 9
+  0x0c8: 03000000     |         .long 3
+  0x0cc: 0a000000     |         .long 10
+  0x0d0: 09000000     |         .long 9
+  0x0d4: 03000000     |         .long 3
+  0x0d8: 0c000000     |         .long 12
+  0x0dc: 03000000     |         .long 3
+  0x0e0: 00000000     |         .long 0                 # null terminated list
+                      | 
+  0x100:              |         .pos 0x100
+  0x100:              | Stack:
